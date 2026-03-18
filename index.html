@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Torneo de Voleibol</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
+  :root{--bg:#0a0a0f;--sur:#13131a;--sur2:#1c1c28;--bor:#2a2a3a;--acc:#f5c842;--red:#e8403a;--txt:#f0f0f5;--mut:#7070a0;--grn:#3adb76;--rad:12px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+  .df{font-family:'Bebas Neue',sans-serif;letter-spacing:0.04em;}
+  header{background:var(--sur);border-bottom:1px solid var(--bor);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .logo{font-size:26px;color:var(--acc);}
+  .logo span{color:var(--txt);}
+  .badge{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px;border:1px solid var(--bor);color:var(--mut);}
+  .badge.org{border-color:var(--acc);color:var(--acc);}
+  .badge.arb{border-color:#7090ff;color:#7090ff;}
+  .badge.pub{border-color:var(--grn);color:var(--grn);}
+  .screen{display:none;padding:24px;max-width:900px;margin:0 auto;}
+  .screen.active{display:block;}
+  .btn{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;padding:12px 24px;border-radius:var(--rad);border:none;cursor:pointer;transition:all .15s;width:100%;margin-top:8px;display:block;}
+  .btn-p{background:var(--acc);color:#0a0a0f;}
+  .btn-p:hover{opacity:.9;}
+  .btn-o{background:transparent;color:var(--txt);border:1px solid var(--bor);}
+  .btn-o:hover{border-color:var(--acc);color:var(--acc);}
+  .btn-sm{font-size:13px;padding:7px 16px;width:auto;display:inline-block;margin-top:0;}
+  .btn-d{background:transparent;color:#e87070;border:1px solid #e87070;}
+  .btn:disabled{opacity:.35;cursor:not-allowed;}
+  .card{background:var(--sur);border:1px solid var(--bor);border-radius:var(--rad);padding:20px;margin-bottom:16px;}
+  .ct{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin-bottom:16px;}
+  .inp{width:100%;background:var(--sur2);border:1px solid var(--bor);border-radius:8px;padding:10px 14px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:15px;margin-bottom:12px;outline:none;transition:border-color .15s;}
+  .inp:focus{border-color:var(--acc);}
+  .al{padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px;}
+  .al-i{background:rgba(112,144,255,.1);border:1px solid rgba(112,144,255,.3);color:#7090ff;}
+  .al-s{background:rgba(58,219,118,.1);border:1px solid rgba(58,219,118,.3);color:var(--grn);}
+  .al-w{background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);color:var(--acc);}
+  .al-e{background:rgba(232,64,58,.1);border:1px solid rgba(232,64,58,.3);color:#ff6b65;}
+
+  /* ── Login ── */
+  .login-wrap{max-width:380px;margin:50px auto;text-align:center;}
+  .login-wrap h1{font-size:64px;color:var(--acc);line-height:1;margin-bottom:4px;}
+  .login-wrap p{color:var(--mut);margin-bottom:32px;font-size:15px;}
+  .role-sel{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px;}
+  .role-btn{background:var(--sur);border:2px solid var(--bor);border-radius:var(--rad);padding:14px 8px;cursor:pointer;transition:all .2s;text-align:center;}
+  .role-btn:hover{border-color:var(--mut);}
+  .role-btn.sel{border-color:var(--acc);}
+  .role-btn .ico{font-size:24px;margin-bottom:6px;}
+  .role-btn h3{font-size:13px;font-weight:600;}
+
+  /* ── Tabs ── */
+  .tabs{display:flex;border-bottom:1px solid var(--bor);margin-bottom:20px;overflow-x:auto;}
+  .tab{padding:10px 18px;font-size:14px;font-weight:500;color:var(--mut);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;white-space:nowrap;}
+  .tab.active{color:var(--acc);border-bottom-color:var(--acc);}
+
+  /* ── Equipos setup ── */
+  .ns{display:flex;gap:8px;margin-bottom:16px;}
+  .nb{width:44px;height:44px;border-radius:8px;border:1px solid var(--bor);background:var(--sur2);color:var(--txt);font-size:18px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  .nb.sel{border-color:var(--acc);color:var(--acc);background:rgba(245,200,66,.08);}
+  .tr{display:flex;align-items:center;gap:10px;background:var(--sur2);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;margin-bottom:8px;}
+  .tr label{color:var(--mut);font-size:13px;width:70px;flex-shrink:0;}
+  .tr input{flex:1;background:transparent;border:none;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;outline:none;}
+
+  /* ── Planilla árbitros ── */
+  .planilla{width:100%;border-collapse:collapse;margin-bottom:8px;}
+  .planilla th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);text-align:left;padding:8px 12px;border-bottom:1px solid var(--bor);}
+  .planilla td{padding:10px 12px;border-bottom:1px solid rgba(42,42,58,.4);font-size:14px;vertical-align:middle;}
+  .planilla tr:last-child td{border-bottom:none;}
+  .pwd-badge{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.12em;color:var(--acc);background:rgba(245,200,66,.08);padding:4px 12px;border-radius:6px;border:1px solid rgba(245,200,66,.2);}
+  .copy-btn{background:transparent;border:1px solid var(--bor);color:var(--mut);font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+  .copy-btn:hover{border-color:var(--acc);color:var(--acc);}
+  .arb-name-inp{background:var(--sur2);border:1px solid var(--bor);border-radius:6px;padding:5px 10px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:120px;}
+  .arb-name-inp:focus{border-color:var(--acc);}
+
+  /* ── Partidos ── */
+  .mcard{background:var(--sur);border:1px solid var(--bor);border-radius:var(--rad);overflow:hidden;margin-bottom:10px;}
+  .mcard.live{border-color:var(--red);}
+  .mcard.finished{border-color:#2a3a2a;opacity:.85;}
+  .mh{background:var(--sur2);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;}
+  .ml{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--mut);text-transform:uppercase;}
+  .ms{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;}
+  .ms.pending{background:rgba(112,112,160,.15);color:var(--mut);}
+  .ms.live{background:rgba(232,64,58,.2);color:#ff6b65;animation:blink 2s infinite;}
+  .ms.finished{background:rgba(58,219,118,.15);color:var(--grn);}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.55}}
+  .mb{padding:16px;display:flex;align-items:center;gap:12px;}
+  .mt{flex:1;text-align:center;}
+  .tn{font-size:16px;font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sc{font-size:52px;color:var(--acc);line-height:1;}
+  .sc.w{color:var(--grn);}
+  .vs{font-size:13px;color:var(--mut);font-weight:600;flex-shrink:0;}
+
+  /* ── Marcador árbitro ── */
+  .sb{width:60px;height:60px;border-radius:10px;border:1px solid var(--bor);background:var(--sur2);color:var(--txt);font-size:30px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;user-select:none;}
+  .sb.plus{border-color:var(--acc);color:var(--acc);}
+  .sb.minus{color:var(--mut);}
+  .sb:active{transform:scale(.93);}
+  .sb:disabled{opacity:.2;cursor:not-allowed;}
+
+  /* ── Standings ── */
+  .stbl{width:100%;border-collapse:collapse;}
+  .stbl th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);text-align:left;padding:8px 12px;border-bottom:1px solid var(--bor);}
+  .stbl td{padding:12px;border-bottom:1px solid rgba(42,42,58,.4);font-size:15px;}
+  .stbl tr:last-child td{border-bottom:none;}
+  .stbl tr.ldr td{background:rgba(245,200,66,.05);}
+
+  /* ── Winner ── */
+  .ws{text-align:center;padding:40px 20px;}
+  .wt{font-size:72px;color:var(--acc);line-height:1;margin-bottom:8px;}
+
+  /* ── Misc ── */
+  .stl{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:20px 0 10px;}
+  .ld{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;margin-right:5px;animation:blink 1.5s infinite;}
+  .pwd-input{font-family:'Bebas Neue',sans-serif;font-size:28px;text-align:center;letter-spacing:.18em;width:100%;background:var(--sur2);border:2px solid var(--bor);border-radius:var(--rad);color:var(--txt);padding:14px;outline:none;text-transform:uppercase;}
+  .pwd-input:focus{border-color:var(--acc);}
+  @media(max-width:560px){.sc{font-size:40px;}.role-sel{grid-template-columns:1fr 1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo df">VOLEY<span>TORNEO</span></div>
+  <div class="badge" id="badge">—</div>
+</header>
+
+<!-- ════════════════════════════════
+     PANTALLA: Login / Selección
+════════════════════════════════ -->
+<div class="screen active" id="sLogin">
+  <div class="login-wrap">
+    <h1 class="df">VOLEY<br>TORNEO</h1>
+    <p>Sistema de marcadores en tiempo real</p>
+
+    <div class="role-sel">
+      <div class="role-btn sel" id="rOrg" onclick="selRole('org')">
+        <div class="ico">🏐</div><h3>Organizador</h3>
+      </div>
+      <div class="role-btn" id="rArb" onclick="selRole('arb')">
+        <div class="ico">📋</div><h3>Árbitro</h3>
+      </div>
+      <div class="role-btn" id="rPub" onclick="selRole('pub')">
+        <div class="ico">👁️</div><h3>Público</h3>
+      </div>
+    </div>
+
+    <!-- Login organizador -->
+    <div id="formOrg">
+      <input class="inp" id="orgEmail" type="email" value="organizador@voley.com" placeholder="Correo">
+      <input class="inp" id="orgPass" type="password" placeholder="Contraseña">
+      <div class="al al-e" id="orgErr" style="display:none;"></div>
+      <button class="btn btn-p" onclick="loginOrg()">Ingresar como Organizador →</button>
+    </div>
+
+    <!-- Login árbitro -->
+    <div id="formArb" style="display:none;">
+      <p style="font-size:14px;color:var(--mut);margin-bottom:16px;text-align:left;">Ingresa la contraseña que te entregó el organizador</p>
+      <input class="pwd-input" id="arbPwd" maxlength="8" placeholder="XXXXXX" oninput="this.value=this.value.toUpperCase()">
+      <div class="al al-e" id="arbErr" style="display:none;margin-top:12px;"></div>
+      <button class="btn btn-p" style="margin-top:12px;" onclick="loginArb()">Ingresar →</button>
+    </div>
+
+    <!-- Público: sin login -->
+    <div id="formPub" style="display:none;">
+      <button class="btn btn-p" onclick="enterPublic()">Ver partidos en tiempo real →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PANTALLA: Organizador
+════════════════════════════════ -->
+<div class="screen" id="sOrg">
+  <div class="tabs">
+    <div class="tab active" onclick="swTab(event,'tEquipos','tPlanilla','tPartidos','tPos')">Equipos</div>
+    <div class="tab" onclick="swTab(event,'tPlanilla','tEquipos','tPartidos','tPos')">Árbitros</div>
+    <div class="tab" onclick="swTab(event,'tPartidos','tEquipos','tPlanilla','tPos')">Partidos</div>
+    <div class="tab" onclick="swTab(event,'tPos','tEquipos','tPlanilla','tPartidos')">Posiciones</div>
+  </div>
+
+  <!-- Tab equipos -->
+  <div id="tEquipos">
+    <div class="card">
+      <div class="ct">Nombre del torneo</div>
+      <input class="inp" id="tName" value="Copa Voley" placeholder="Nombre del torneo">
+    </div>
+    <div class="card">
+      <div class="ct">Número de equipos</div>
+      <div class="ns">
+        <div class="nb sel" onclick="setN(4,this)">4</div>
+        <div class="nb" onclick="setN(5,this)">5</div>
+        <div class="nb" onclick="setN(6,this)">6</div>
+      </div>
+      <div class="ct">Nombres</div>
+      <div id="tInputs"></div>
+    </div>
+    <button class="btn btn-p" onclick="createTournament()">Generar torneo y contraseñas →</button>
+    <div id="setupMsg"></div>
+  </div>
+
+  <!-- Tab planilla árbitros -->
+  <div id="tPlanilla" style="display:none;">
+    <div class="al al-i">Comparte cada contraseña con el árbitro correspondiente por WhatsApp. Puedes anotar el nombre del árbitro en cada fila.</div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div id="planillaContent"></div>
+    </div>
+    <button class="btn btn-o btn-sm" style="margin-top:12px;" onclick="regenerarPasswords()">↻ Regenerar contraseñas</button>
+    <button class="btn btn-d btn-sm" style="margin-left:8px;" onclick="resetTorneo()">Reiniciar torneo completo</button>
+  </div>
+
+  <!-- Tab partidos -->
+  <div id="tPartidos" style="display:none;">
+    <div id="orgMatchList"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+      <button class="btn btn-o btn-sm" onclick="checkWinner()">Ver ganador 🏆</button>
+      <button class="btn btn-d btn-sm" onclick="soloResetMarcadores()">Reiniciar marcadores</button>
+    </div>
+  </div>
+
+  <!-- Tab posiciones -->
+  <div id="tPos" style="display:none;">
+    <div id="orgStand" class="card"></div>
+  </div>
+
+  <button class="btn btn-o" style="margin-top:24px;" onclick="doLogout()">Cerrar sesión</button>
+</div>
+
+<!-- ════════════════════════════════
+     PANTALLA: Árbitro – marcador
+════════════════════════════════ -->
+<div class="screen" id="sArbitro">
+  <div id="arbCont"></div>
+  <button class="btn btn-o" style="margin-top:16px;" onclick="doLogout()">Cerrar sesión</button>
+</div>
+
+<!-- ════════════════════════════════
+     PANTALLA: Público
+════════════════════════════════ -->
+<div class="screen" id="sPublic">
+  <div class="tabs">
+    <div class="tab active" onclick="swTab(event,'tPM','tPS','tPF')">En vivo</div>
+    <div class="tab" onclick="swTab(event,'tPS','tPM','tPF')">Posiciones</div>
+    <div class="tab" onclick="swTab(event,'tPF','tPM','tPS')">Finalizados</div>
+  </div>
+  <div id="tPM"><div id="pubList"></div></div>
+  <div id="tPS" style="display:none;"><div id="pubStand" class="card"></div></div>
+  <div id="tPF" style="display:none;"><div id="pubFin"></div></div>
+  <button class="btn btn-o" style="margin-top:16px;" onclick="doLogout()">← Salir</button>
+</div>
+
+<!-- ════════════════════════════════
+     PANTALLA: Ganador
+════════════════════════════════ -->
+<div class="screen" id="sWin">
+  <div class="ws">
+    <div style="font-size:80px;margin-bottom:16px;">🏆</div>
+    <div class="wt df" id="wName"></div>
+    <div style="font-size:18px;color:var(--mut);margin-bottom:32px;" id="wReason"></div>
+    <div id="wStand" class="card" style="text-align:left;margin:24px 0;"></div>
+    <button class="btn btn-o btn-sm" onclick="show('sOrg');swTabById('tPartidos')">← Volver a partidos</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     Firebase + Lógica
+════════════════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+const FC = {
+  apiKey: "AIzaSyC6CZjqDpIIuaRHlWkeHV5pvp9F184PRc",
+  authDomain: "voley-torneo-f5e3d.firebaseapp.com",
+  databaseURL: "https://voley-torneo-f5e3d-default-rtdb.firebaseio.com",
+  projectId: "voley-torneo-f5e3d",
+  storageBucket: "voley-torneo-f5e3d.firebasestorage.app",
+  messagingSenderId: "113548429898",
+  appId: "1:113548429898:web:813248d832dbfdb6ce15db"
+};
+
+const fbApp = initializeApp(FC);
+const db    = getDatabase(fbApp);
+const auth  = getAuth(fbApp);
+
+// ── Estado ────────────────────────────────────────
+let currentRole = 'org';   // 'org' | 'arb' | 'pub'
+let arbMatchId  = null;    // partido asignado al árbitro logueado
+let numT        = 4;
+let unsub       = null;
+
+// ── Utilidades ────────────────────────────────────
+const $  = id => document.getElementById(id);
+const dg = path => get(ref(db,path)).then(s=>s.exists()?s.val():null);
+const ds = (path,v) => set(ref(db,path),v);
+const du = (path,v) => update(ref(db,path),v);
+
+window.show = id => {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+};
+
+function badge(txt,cls){ const b=$('badge'); b.textContent=txt; b.className='badge'+(cls?' '+cls:''); }
+
+function listen(path,cb){
+  if(unsub) unsub();
+  unsub = onValue(ref(db,path), sn=>cb(sn.exists()?sn.val():null));
+}
+function stopL(){ if(unsub){unsub();unsub=null;} }
+
+window.swTab = function(e,...ids){
+  const [showId,...hideIds]=ids;
+  hideIds.forEach(id=>{const el=$(id);if(el)el.style.display='none';});
+  $(showId).style.display='block';
+  e.target.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  e.target.classList.add('active');
+  onTabSwitch(showId);
+};
+
+window.swTabById = function(showId){
+  const tabs = ['tEquipos','tPlanilla','tPartidos','tPos'];
+  tabs.forEach(id=>{const el=$(id);if(el)el.style.display='none';});
+  $(showId).style.display='block';
+  document.querySelectorAll('#sOrg .tab').forEach((t,i)=>{
+    t.classList.toggle('active', ['tEquipos','tPlanilla','tPartidos','tPos'][i]===showId);
+  });
+  onTabSwitch(showId);
+};
+
+function onTabSwitch(id){
+  if(id==='tPlanilla') renderPlanilla();
+  if(id==='tPartidos') { dg('torneo').then(d=>renderMatchList('orgMatchList',d,false)); }
+  if(id==='tPos')      { dg('torneo').then(d=>{$('orgStand').innerHTML=buildStand(d);}); }
+  if(id==='tPS')       { dg('torneo').then(d=>{$('pubStand').innerHTML=buildStand(d);}); }
+  if(id==='tPF')       { dg('torneo').then(d=>renderFinished('pubFin',d)); }
+}
+
+// ── Generador de contraseñas ──────────────────────
+function genPwd(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s='';
+  for(let i=0;i<6;i++) s+=chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+
+// ── Selección de rol ──────────────────────────────
+window.selRole = function(r){
+  currentRole=r;
+  ['org','arb','pub'].forEach(x=>{
+    $('r'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('sel',x===r);
+    $('form'+x.charAt(0).toUpperCase()+x.slice(1)).style.display = x===r?'block':'none';
+  });
+};
+
+// ── Login organizador ─────────────────────────────
+window.loginOrg = async function(){
+  const email=$('orgEmail').value.trim();
+  const pass=$('orgPass').value;
+  const err=$('orgErr'); err.style.display='none';
+  if(!pass){err.textContent='Ingresa la contraseña.';err.style.display='block';return;}
+  const btn=event.target; btn.disabled=true; btn.textContent='Ingresando...';
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+  }catch(e){
+    err.textContent='Contraseña incorrecta.';
+    err.style.display='block';
+    btn.disabled=false; btn.textContent='Ingresar como Organizador →';
+  }
+};
+
+// ── Login árbitro (contraseña en DB) ──────────────
+window.loginArb = async function(){
+  const pwd=$('arbPwd').value.trim().toUpperCase();
+  const err=$('arbErr'); err.style.display='none';
+  if(pwd.length<4){err.textContent='Ingresa la contraseña.';err.style.display='block';return;}
+  const btn=event.target; btn.disabled=true; btn.textContent='Verificando...';
+  try{
+    const torneo = await dg('torneo');
+    if(!torneo||!torneo.matches){
+      err.textContent='No hay torneo activo aún.';err.style.display='block';
+      btn.disabled=false;btn.textContent='Ingresar →';return;
+    }
+    // Buscar qué partido tiene esa contraseña
+    const match = torneo.matches.find(m=>m.pwd===pwd);
+    if(!match){
+      err.textContent='Contraseña incorrecta. Verifica con el organizador.';
+      err.style.display='block';
+      btn.disabled=false;btn.textContent='Ingresar →';return;
+    }
+    arbMatchId=match.id;
+    badge('Árbitro · Partido '+(match.id+1),'arb');
+    renderArbScore(match.id,torneo);
+    show('sArbitro');
+    listen('torneo',d=>{
+      if($('sArbitro').classList.contains('active')&&d)
+        renderArbScore(arbMatchId,d);
+    });
+  }catch(e){
+    err.textContent='Error de conexión.';err.style.display='block';
+  }finally{
+    btn.disabled=false;btn.textContent='Ingresar →';
+  }
+};
+
+// ── Público ───────────────────────────────────────
+window.enterPublic = function(){
+  badge('Público','pub');
+  show('sPublic');
+  listen('torneo',d=>{
+    if($('sPublic').classList.contains('active')&&d){
+      renderMatchList('pubList',d,true);
+    }
+  });
+};
+
+// ── Auth state (solo organizador usa Firebase Auth) ─
+onAuthStateChanged(auth, async user=>{
+  if(!user) return;
+  badge('Organizador','org');
+  show('sOrg');
+  $('orgPass').value='';
+  renderTInputs(numT);
+  const data = await dg('torneo');
+  if(data) restoreSetup(data);
+  listen('torneo',d=>{
+    if(!d||!$('sOrg').classList.contains('active')) return;
+    if($('tPartidos').style.display!=='none') renderMatchList('orgMatchList',d,false);
+    if($('tPos').style.display!=='none') $('orgStand').innerHTML=buildStand(d);
+  });
+});
+
+window.doLogout = async function(){
+  stopL();
+  arbMatchId=null;
+  try{ await signOut(auth); }catch(e){}
+  badge('—','');
+  show('sLogin');
+  $('orgPass').value='';
+  $('arbPwd').value='';
+  selRole('org');
+};
+
+// ── Setup torneo ──────────────────────────────────
+window.setN = function(n,el){
+  numT=n;
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  renderTInputs(n);
+};
+
+function renderTInputs(n){
+  const defs=['Tigres','Águilas','Cóndores','Pumas','Leones','Lobos'];
+  const c=$('tInputs'); c.innerHTML='';
+  for(let i=0;i<n;i++){
+    const d=document.createElement('div'); d.className='tr';
+    d.innerHTML=`<label>Equipo ${i+1}</label><input id="t_${i}" value="${defs[i]}">`;
+    c.appendChild(d);
+  }
+}
+
+function restoreSetup(data){
+  if(data.name) $('tName').value=data.name;
+  if(data.teams){
+    numT=data.teams.length;
+    document.querySelectorAll('.nb').forEach(b=>{
+      b.classList.toggle('sel', parseInt(b.textContent)===numT);
+    });
+    renderTInputs(numT);
+    data.teams.forEach((t,i)=>{ const el=$('t_'+i); if(el) el.value=t; });
+  }
+}
+
+window.createTournament = async function(){
+  const name=$('tName').value.trim()||'Copa Voley';
+  const teams=[];
+  for(let i=0;i<numT;i++){
+    const v=$('t_'+i).value.trim();
+    if(!v){alert('Ingresa el nombre del equipo '+(i+1));return;}
+    teams.push(v);
+  }
+  const btn=event.target; btn.disabled=true; btn.textContent='Generando...';
+  const msg=$('setupMsg');
+  try{
+    const existing = await dg('torneo');
+    let matches;
+    // Si los equipos son los mismos, conservar marcadores y contraseñas
+    if(existing&&existing.teams&&JSON.stringify(existing.teams)===JSON.stringify(teams)){
+      matches=existing.matches;
+    } else {
+      matches=genMatches(teams);
+    }
+    await ds('torneo',{name,teams,matches,updated:Date.now()});
+    msg.innerHTML='<div class="al al-s" style="margin-top:12px;">✓ Torneo creado. Ve a la pestaña "Árbitros" para ver las contraseñas.</div>';
+    setTimeout(()=>msg.innerHTML='',4000);
+    // Ir a planilla automáticamente
+    setTimeout(()=>swTabById('tPlanilla'),1000);
+  }catch(e){
+    msg.innerHTML=`<div class="al al-e" style="margin-top:12px;">Error: ${e.message}</div>`;
+  }finally{
+    btn.disabled=false; btn.textContent='Generar torneo y contraseñas →';
+  }
+};
+
+function genMatches(teams){
+  const m=[];let id=0;
+  for(let i=0;i<teams.length;i++)
+    for(let j=i+1;j<teams.length;j++)
+      m.push({id:id++,team1:teams[i],team2:teams[j],score1:0,score2:0,status:'pending',pwd:genPwd(),arbitro:''});
+  return m;
+}
+
+// ── Planilla árbitros ─────────────────────────────
+async function renderPlanilla(){
+  const data=await dg('torneo');
+  const c=$('planillaContent');
+  if(!data||!data.matches){
+    c.innerHTML='<div style="padding:20px;color:var(--mut);font-size:14px;">Primero genera el torneo en la pestaña "Equipos".</div>';
+    return;
+  }
+  c.innerHTML=`
+    <table class="planilla">
+      <thead><tr>
+        <th>Partido</th>
+        <th>Equipos</th>
+        <th>Contraseña árbitro</th>
+        <th>Nombre árbitro</th>
+        <th></th>
+      </tr></thead>
+      <tbody>
+        ${data.matches.map(m=>`
+          <tr>
+            <td style="color:var(--mut);font-weight:600;">#${m.id+1}</td>
+            <td><span style="font-weight:500;">${m.team1}</span> <span style="color:var(--mut);">vs</span> <span style="font-weight:500;">${m.team2}</span></td>
+            <td><span class="pwd-badge" id="pwd_${m.id}">${m.pwd}</span></td>
+            <td><input class="arb-name-inp" id="arbn_${m.id}" value="${m.arbitro||''}" placeholder="Nombre árbitro" onchange="saveArbName(${m.id},this.value)"></td>
+            <td>
+              <button class="copy-btn" onclick="copyMsg(${m.id})">📋 Copiar WhatsApp</button>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+window.saveArbName = async function(matchId, nombre){
+  await du('torneo/matches/'+matchId, {arbitro:nombre});
+};
+
+window.copyMsg = async function(matchId){
+  const data=await dg('torneo');
+  const m=data.matches[matchId];
+  const appUrl=window.location.href;
+  const msg=`🏐 *${data.name||'Torneo de Voley'}*\n\nHola! Eres el árbitro del Partido ${m.id+1}:\n*${m.team1}* vs *${m.team2}*\n\n📱 Abre la app:\n${appUrl}\n\n🔑 Selecciona "Árbitro" e ingresa tu contraseña:\n*${m.pwd}*\n\n¡Gracias!`;
+  try{
+    await navigator.clipboard.writeText(msg);
+    const btn=event.target;
+    btn.textContent='✓ Copiado!';
+    setTimeout(()=>btn.textContent='📋 Copiar WhatsApp',2000);
+  }catch(e){
+    alert('Contraseña: '+m.pwd);
+  }
+};
+
+window.regenerarPasswords = async function(){
+  if(!confirm('¿Regenerar contraseñas? Las actuales dejarán de funcionar y deberás reenviar las nuevas a los árbitros.'))return;
+  const data=await dg('torneo');
+  if(!data)return;
+  data.matches.forEach(m=>{ m.pwd=genPwd(); });
+  await ds('torneo/matches',data.matches);
+  renderPlanilla();
+};
+
+window.resetTorneo = async function(){
+  if(!confirm('¿Reiniciar torneo completo? Se borrarán marcadores y se generarán nuevas contraseñas.'))return;
+  const data=await dg('torneo');
+  if(!data)return;
+  data.matches=genMatches(data.teams);
+  await ds('torneo',{...data,updated:Date.now()});
+  renderPlanilla();
+  alert('Torneo reiniciado. Ve a "Árbitros" para ver las nuevas contraseñas.');
+};
+
+window.soloResetMarcadores = async function(){
+  if(!confirm('¿Reiniciar solo los marcadores? Las contraseñas y árbitros se conservan.'))return;
+  const data=await dg('torneo');
+  if(!data)return;
+  data.matches.forEach(m=>{m.score1=0;m.score2=0;m.status='pending';});
+  await ds('torneo/matches',data.matches);
+  dg('torneo').then(d=>renderMatchList('orgMatchList',d,false));
+};
+
+// ── Marcador árbitro ──────────────────────────────
+function renderArbScore(matchId, data){
+  if(!data||!data.matches){ $('arbCont').innerHTML='<div class="al al-w">No hay torneo activo.</div>'; return; }
+  const m=data.matches[matchId];
+  if(!m){ $('arbCont').innerHTML='<div class="al al-e">Partido no encontrado.</div>'; return; }
+  const done=m.status==='finished';
+  const w1=done&&m.score1>m.score2?'w':'', w2=done&&m.score2>m.score1?'w':'';
+  $('arbCont').innerHTML=`
+    <div style="text-align:center;padding:4px 0 18px;">
+      <span class="ms ${m.status}" style="display:inline-block;margin-bottom:10px;">
+        ${m.status==='live'?'<span class="ld"></span>En juego':m.status==='pending'?'Pendiente':'✓ Finalizado'}
+      </span>
+      <div class="ct">${data.name||'Torneo'} · Partido ${m.id+1}</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 40px 1fr;align-items:center;gap:4px;margin-bottom:28px;">
+      <div style="text-align:center;">
+        <div style="font-size:15px;font-weight:600;color:var(--mut);margin-bottom:10px;min-height:20px;">${m.team1}</div>
+        <div class="sc df ${w1}" style="font-size:88px;margin-bottom:16px;">${m.score1}</div>
+        ${!done?`<div style="display:flex;gap:10px;justify-content:center;">
+          <button class="sb minus" onclick="chS(${matchId},0,-1)" ${m.score1===0?'disabled':''}>−</button>
+          <button class="sb plus" onclick="chS(${matchId},0,1)">+</button>
+        </div>`:''}
+      </div>
+      <div style="font-size:20px;font-weight:300;color:var(--mut);text-align:center;">VS</div>
+      <div style="text-align:center;">
+        <div style="font-size:15px;font-weight:600;color:var(--mut);margin-bottom:10px;min-height:20px;">${m.team2}</div>
+        <div class="sc df ${w2}" style="font-size:88px;margin-bottom:16px;">${m.score2}</div>
+        ${!done?`<div style="display:flex;gap:10px;justify-content:center;">
+          <button class="sb minus" onclick="chS(${matchId},1,-1)" ${m.score2===0?'disabled':''}>−</button>
+          <button class="sb plus" onclick="chS(${matchId},1,1)">+</button>
+        </div>`:''}
+      </div>
+    </div>
+
+    ${!done?`
+      <div class="al al-w">Una vez finalizado, el marcador queda <strong>bloqueado para siempre</strong>.</div>
+      <button class="btn btn-p" onclick="sfM(${matchId})" style="margin-top:8px;">
+        ${m.status==='pending'?'▶ Iniciar partido':'✓ Finalizar partido'}
+      </button>`
+    :`<div class="al al-s">Partido finalizado. El marcador está bloqueado.</div>`}`;
+}
+
+window.chS = async function(matchId,ti,delta){
+  const data=await dg('torneo');
+  const m=data.matches[matchId];
+  if(m.status==='finished')return;
+  if(ti===0) m.score1=Math.max(0,m.score1+delta);
+  else       m.score2=Math.max(0,m.score2+delta);
+  if(m.status==='pending') m.status='live';
+  await du('torneo/matches/'+matchId,{score1:m.score1,score2:m.score2,status:m.status});
+};
+
+window.sfM = async function(matchId){
+  const data=await dg('torneo');
+  const m=data.matches[matchId];
+  if(m.status==='pending'){
+    await du('torneo/matches/'+matchId,{status:'live'});
+  } else if(m.status==='live'){
+    if(!confirm(`¿Finalizar el partido?\n${m.team1} ${m.score1} – ${m.score2} ${m.team2}\n\nEsta acción no se puede deshacer.`))return;
+    await du('torneo/matches/'+matchId,{status:'finished'});
+  }
+};
+
+// ── Lista de partidos (admin y público) ───────────
+function renderMatchList(containerId, data, pubMode){
+  if(!data||!data.matches){$(containerId).innerHTML='<div class="al al-i">No hay torneo activo.</div>';return;}
+  const live=data.matches.filter(m=>m.status==='live');
+  const pend=data.matches.filter(m=>m.status==='pending');
+  const fin=data.matches.filter(m=>m.status==='finished');
+  let h='';
+  if(pubMode){
+    if(!live.length&&!pend.length) h='<div class="al al-s">Todos los partidos han finalizado. Ve "Posiciones".</div>';
+    if(live.length) h+=`<div class="stl"><span class="ld"></span>En juego ahora</div>`+live.map(m=>mCard(m)).join('');
+    if(pend.length) h+=`<div class="stl" style="margin-top:${live.length?'20px':'0'};">Próximos</div>`+pend.map(m=>mCard(m)).join('');
+  } else {
+    const done=fin.length, total=data.matches.length;
+    if(done>0) h+=`<div class="al al-i">${done} de ${total} partidos completados</div>`;
+    if(done===total&&total>0) h+=`<div class="al al-s">¡Todos los partidos terminaron! <button class="btn btn-sm btn-p" onclick="checkWinner()" style="margin-top:0;margin-left:8px;">Ver ganador 🏆</button></div>`;
+    h+=data.matches.map(m=>mCard(m)).join('');
+  }
+  $(containerId).innerHTML=h;
+}
+
+function renderFinished(containerId,data){
+  if(!data||!data.matches){$(containerId).innerHTML='<div class="al al-i">No hay torneo activo.</div>';return;}
+  const fin=data.matches.filter(m=>m.status==='finished');
+  $(containerId).innerHTML=fin.length?fin.map(m=>mCard(m)).join(''):'<div class="al al-i">Aún no hay partidos finalizados.</div>';
+}
+
+function mCard(m){
+  const lbl={pending:'Pendiente',live:'<span class="ld"></span>En juego',finished:'✓ Finalizado'};
+  const w1=m.status==='finished'&&m.score1>m.score2?'w':'';
+  const w2=m.status==='finished'&&m.score2>m.score1?'w':'';
+  return `<div class="mcard ${m.status}">
+    <div class="mh">
+      <span class="ml">Partido ${m.id+1}${m.arbitro?' · '+m.arbitro:''}</span>
+      <span class="ms ${m.status}">${lbl[m.status]}</span>
+    </div>
+    <div class="mb">
+      <div class="mt"><div class="tn">${m.team1}</div><div class="sc df ${w1}">${m.score1}</div></div>
+      <div class="vs">VS</div>
+      <div class="mt"><div class="tn">${m.team2}</div><div class="sc df ${w2}">${m.score2}</div></div>
+    </div></div>`;
+}
+
+// ── Standings ─────────────────────────────────────
+function calcRank(data){
+  const s={};
+  data.teams.forEach(t=>{s[t]={wins:0,losses:0,pf:0,pa:0,played:0};});
+  data.matches.filter(m=>m.status==='finished').forEach(m=>{
+    const a=s[m.team1],b=s[m.team2];
+    a.played++;b.played++;a.pf+=m.score1;a.pa+=m.score2;b.pf+=m.score2;b.pa+=m.score1;
+    if(m.score1>m.score2){a.wins++;b.losses++;}else{b.wins++;a.losses++;}
+  });
+  return data.teams.map(t=>({name:t,...s[t]})).sort((a,b)=>{
+    if(b.wins!==a.wins) return b.wins-a.wins;
+    if(b.pf!==a.pf) return b.pf-a.pf;
+    const h=data.matches.find(m=>m.status==='finished'&&
+      ((m.team1===a.name&&m.team2===b.name)||(m.team1===b.name&&m.team2===a.name)));
+    if(h) return (h.team1===a.name?h.score1>h.score2:h.score2>h.score1)?-1:1;
+    return 0;
+  });
+}
+
+function buildStand(data){
+  if(!data||!data.matches) return '<p style="color:var(--mut);">No hay torneo activo.</p>';
+  const done=data.matches.filter(m=>m.status==='finished').length;
+  if(!done) return '<p style="color:var(--mut);font-size:14px;">Aún no hay partidos finalizados.</p>';
+  const rank=calcRank(data);
+  const md=['🥇','🥈','🥉'];
+  return`<table class="stbl"><thead><tr>
+    <th>#</th><th>Equipo</th><th>PJ</th><th>PG</th><th>PP</th><th>Pts</th>
+  </tr></thead><tbody>
+    ${rank.map((t,i)=>`<tr class="${i===0?'ldr':''}">
+      <td style="font-weight:600;color:${i===0?'var(--acc)':'var(--mut)'};">${md[i]||i+1}</td>
+      <td style="font-weight:500;">${t.name}</td>
+      <td style="color:var(--mut);">${t.played}</td>
+      <td style="color:var(--grn);font-weight:600;">${t.wins}</td>
+      <td style="color:var(--red);">${t.losses}</td>
+      <td style="font-weight:600;">${t.pf}</td>
+    </tr>`).join('')}
+  </tbody></table>
+  <p style="font-size:11px;color:var(--mut);margin-top:12px;">PJ=Jugados · PG=Ganados · PP=Perdidos · Pts=Puntos a favor</p>`;
+}
+
+// ── Ganador ───────────────────────────────────────
+window.checkWinner = async function(){
+  const data=await dg('torneo');
+  if(!data||!data.matches.every(m=>m.status==='finished')){
+    alert('Aún quedan partidos por jugar.');return;
+  }
+  const rank=calcRank(data);
+  const w=rank[0], r2=rank[1];
+  const reason = w.wins>r2.wins ? `Más partidos ganados: ${w.wins} victorias`
+    : w.pf>r2.pf ? `Desempate por puntos totales: ${w.pf} puntos`
+    : 'Desempate por enfrentamiento directo';
+  $('wName').textContent=w.name.toUpperCase();
+  $('wReason').textContent=reason;
+  $('wStand').innerHTML='<div class="ct">Tabla final</div>'+buildStand(data);
+  show('sWin');
+};
+
+// ── Init ──────────────────────────────────────────
+renderTInputs(4);
+selRole('org');
+</script>
+</body>
+</html>
