@@ -146,7 +146,10 @@
     <!-- Login organizador -->
     <div id="formOrg">
       <input class="inp" id="orgEmail" type="email" value="organizador@voley.com" placeholder="Correo">
-      <input class="inp" id="orgPass" type="password" placeholder="Contraseña">
+      <div style="position:relative;">
+        <input class="inp" id="orgPass" type="password" placeholder="Contraseña" style="padding-right:48px;margin-bottom:12px;">
+        <button type="button" onclick="togglePwd('orgPass',this)" style="position:absolute;right:12px;top:10px;background:none;border:none;cursor:pointer;font-size:18px;color:var(--mut);">👁️</button>
+      </div>
       <div class="al al-e" id="orgErr" style="display:none;"></div>
       <button class="btn btn-p" onclick="loginOrg()">Ingresar como Organizador →</button>
     </div>
@@ -154,7 +157,10 @@
     <!-- Login árbitro -->
     <div id="formArb" style="display:none;">
       <p style="font-size:14px;color:var(--mut);margin-bottom:16px;text-align:left;">Ingresa la contraseña que te entregó el organizador</p>
-      <input class="pwd-input" id="arbPwd" maxlength="8" placeholder="XXXXXX" oninput="this.value=this.value.toUpperCase()">
+      <div style="position:relative;">
+        <input class="pwd-input" id="arbPwd" maxlength="8" placeholder="XXXXXX" oninput="this.value=this.value.toUpperCase()">
+        <button type="button" onclick="togglePwd('arbPwd',this)" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:20px;color:var(--mut);">👁️</button>
+      </div>
       <div class="al al-e" id="arbErr" style="display:none;margin-top:12px;"></div>
       <button class="btn btn-p" style="margin-top:12px;" onclick="loginArb()">Ingresar →</button>
     </div>
@@ -748,6 +754,14 @@ window.checkWinner = async function(){
   $('wReason').textContent=reason;
   $('wStand').innerHTML='<div class="ct">Tabla final</div>'+buildStand(data);
   show('sWin');
+};
+
+// ── Toggle password visibility ────────────────────
+window.togglePwd = function(inputId, btn){
+  const inp=$(inputId);
+  const show = inp.type==='password';
+  inp.type = show ? 'text' : 'password';
+  btn.textContent = show ? '🙈' : '👁️';
 };
 
 // ── Init ──────────────────────────────────────────
