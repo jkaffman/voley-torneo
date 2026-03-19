@@ -366,12 +366,18 @@ window.loginOrg = async function(){
   const btn=event.target; btn.disabled=true; btn.textContent='Ingresando...';
   try{
     window._loggingIn = true;
-    await signInWithEmailAndPassword(auth,email,pass);
+    const cred = await signInWithEmailAndPassword(auth,email,pass);
+    // Login exitoso — onAuthStateChanged se encarga de navegar
   }catch(e){
     window._loggingIn = false;
     err.textContent='Contraseña incorrecta.';
     err.style.display='block';
     btn.disabled=false; btn.textContent='Ingresar como Organizador →';
+  }finally{
+    // Garantizar que el botón siempre se reactive
+    if(!window._loggingIn){
+      btn.disabled=false; btn.textContent='Ingresar como Organizador →';
+    }
   }
 };
 
@@ -425,6 +431,9 @@ onAuthStateChanged(auth, async user=>{
   // Solo actuar si el usuario acaba de hacer login (no al cargar la página)
   if(!user || !window._loggingIn) return;
   window._loggingIn = false;
+  // Reactivar botón
+  const btn = document.querySelector('#formOrg .btn-p');
+  if(btn){ btn.disabled=false; btn.textContent='Ingresar como Organizador →'; }
   badge('Organizador','org');
   show('sOrg');
   $('orgPass').value='';
@@ -441,11 +450,15 @@ onAuthStateChanged(auth, async user=>{
 window.doLogout = async function(){
   stopL();
   arbMatchId=null;
+  window._loggingIn = false;
   try{ await signOut(auth); }catch(e){}
   badge('—','');
   show('sLogin');
   $('orgPass').value='';
   $('arbPwd').value='';
+  // Reset login button in case it was stuck
+  const btn = document.querySelector('#formOrg .btn-p');
+  if(btn){ btn.disabled=false; btn.textContent='Ingresar como Organizador →'; }
   selRole('org');
 };
 
