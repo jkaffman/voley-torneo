@@ -365,8 +365,10 @@ window.loginOrg = async function(){
   if(!pass){err.textContent='Ingresa la contraseña.';err.style.display='block';return;}
   const btn=event.target; btn.disabled=true; btn.textContent='Ingresando...';
   try{
+    window._loggingIn = true;
     await signInWithEmailAndPassword(auth,email,pass);
   }catch(e){
+    window._loggingIn = false;
     err.textContent='Contraseña incorrecta.';
     err.style.display='block';
     btn.disabled=false; btn.textContent='Ingresar como Organizador →';
@@ -420,7 +422,9 @@ window.enterPublic = function(){
 
 // ── Auth state (solo organizador usa Firebase Auth) ─
 onAuthStateChanged(auth, async user=>{
-  if(!user) return;
+  // Solo actuar si el usuario acaba de hacer login (no al cargar la página)
+  if(!user || !window._loggingIn) return;
+  window._loggingIn = false;
   badge('Organizador','org');
   show('sOrg');
   $('orgPass').value='';
@@ -818,10 +822,9 @@ window.togglePwd = function(inputId, btn){
   btn.textContent = show ? '🙈' : '👁️';
 };
 
-// ── Init: cerrar sesión al cargar para siempre mostrar login ──
+// ── Init ──────────────────────────────────────────
 renderTInputs(4);
 selRole('org');
-signOut(auth).catch(()=>{});
 </script>
 </body>
 </html>
