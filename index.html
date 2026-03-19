@@ -818,9 +818,10 @@ window.togglePwd = function(inputId, btn){
   btn.textContent = show ? '🙈' : '👁️';
 };
 
-// ── Init ──────────────────────────────────────────
+// ── Init: cerrar sesión al cargar para siempre mostrar login ──
 renderTInputs(4);
 selRole('org');
+signOut(auth).catch(()=>{});
 </script>
 </body>
 </html>
